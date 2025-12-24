@@ -1,6 +1,6 @@
 # Project Conventions: LLM Council
 
-**Version:** 1.2  
+**Version:** 1.3  
 **Date:** December 24, 2025  
 **Status:** Active  
 **Purpose:** Establish consistent standards and conventions for development
@@ -167,11 +167,13 @@ project management/
 │   ├── v1.0/
 │   │   ├── PRD-v1.0.md               # Version 1.0 requirements
 │   │   ├── TechnicalSpec-v1.0.md     # Version 1.0 architecture
+│   │   ├── TestPlan-v1.0.md          # Version 1.0 test documentation
 │   │   └── ReleaseNotes-v1.0.md      # What shipped in v1.0
 │   ├── v1.1/
 │   │   ├── PRD-v1.1.md               # Version 1.1 requirements
 │   │   ├── TechnicalSpec-v1.1.md     # Version 1.1 architecture
 │   │   ├── ImplementationPlan-v1.1.md # How to implement v1.1
+│   │   ├── TestPlan-v1.1.md          # Version 1.1 test documentation
 │   │   └── ReleaseNotes-v1.1.md      # What shipped in v1.1 (when done)
 │   └── v2.0/
 │       └── PRD-v2.0.md               # Next version (draft)
@@ -191,6 +193,7 @@ project management/
 - **PRD-vX.Y.md** - Version-scoped product requirements:
   - Created by PM for each version
   - Contains functional and non-functional requirements
+  - Test acceptance criteria for each FR/NFR
   - Clear scope boundaries per release
   - Archived after version ships
 
@@ -204,9 +207,17 @@ project management/
   - Testing checklists
   - Rollback strategies
 
+- **TestPlan-vX.Y.md** - Version-scoped test documentation:
+  - Test strategy and approach
+  - Coverage matrix by requirement
+  - Test execution results and history
+  - Regression test suite definition
+  - Known issues and flaky tests
+
 - **ReleaseNotes-vX.Y.md** - What actually shipped:
   - Created when version is released
   - Documents what was implemented vs planned
+  - Final test coverage and results
   - Known issues and workarounds
 
 ### Version-Based Requirement References
@@ -854,6 +865,195 @@ def test_conversation():
     }
 ```
 
+---
+
+### Test Documentation
+
+Tests must be documented in **multiple locations** for different purposes:
+
+#### 1. In Requirements (PRD-vX.Y.md)
+
+**Purpose:** Define WHAT needs to be tested (acceptance criteria)
+
+**Location:** Within each FR/NFR section
+
+**Format:**
+```markdown
+#### FR-1.1: Backend Dockerfile
+
+The system shall provide a Dockerfile...
+
+**Test Plan:**
+- Test-1.1.1: Image builds without errors
+- Test-1.1.2: Container exposes port 8001  
+- Test-1.1.3: uv sync installs all dependencies
+
+**Test Type:** Integration
+**Risk Level:** Medium
+**Coverage Target:** 90%
+**Test Files:** `tests/backend/test_dockerfile.py`
+**Status:** ⏳ 2/3 passing
+```
+
+**When to Update:** During requirements phase, before implementation starts
+
+#### 2. In Test Plan Document (TestPlan-vX.Y.md)
+
+**Purpose:** Overall test strategy, coverage tracking, results
+
+**Location:** `project management/versions/vX.Y/TestPlan-vX.Y.md`
+
+**Contents:**
+- Test strategy and approach
+- Coverage matrix by requirement
+- Test execution results  
+- Test environment setup
+- Known issues and flaky tests
+- Regression test suite
+- Test schedule
+
+**When to Update:** Throughout development, after each test run
+
+**Example Structure:**
+```markdown
+# Test Plan: LLM Council v1.1
+
+## Test Coverage Matrix
+| Requirement | Test Count | Passing | Coverage | Status |
+|-------------|-----------|---------|----------|--------|
+| FR-1.1 | 3 | 3 | 100% | ✅ Complete |
+| FR-1.2 | 4 | 3 | 85% | 🟡 In Progress |
+
+## Test Execution Results
+Last Run: 2025-12-24 14:30:00
+- Backend: 95% coverage ✅
+- Frontend: 88% coverage 🟡
+- Total: 156 tests passing
+
+## Regression Testing
+- v1.0 council query: ✅ Passing
+- v1.0 storage: ✅ Passing
+```
+
+#### 3. In Test Code Files
+
+**Purpose:** Actual test implementation with clear documentation
+
+**Location:** `tests/backend/`, `tests/frontend/`
+
+**Format:**
+```python
+def test_backend_image_builds_successfully():
+    """
+    Test-1.1.1: Backend Docker image builds without errors.
+    
+    Verifies: FR-1.1 (Backend Dockerfile)
+    
+    Given: backend.Dockerfile exists with valid configuration
+    When: docker build command is executed  
+    Then: Image builds successfully with exit code 0
+    """
+    # Arrange
+    dockerfile_path = Path("backend.Dockerfile")
+    
+    # Act
+    result = subprocess.run(
+        ["docker", "build", "-f", dockerfile_path, "."],
+        capture_output=True
+    )
+    
+    # Assert
+    assert result.returncode == 0
+    assert "Successfully built" in result.stdout.decode()
+```
+
+**When to Update:** During TDD cycle (write tests before code)
+
+#### 4. In Release Notes (ReleaseNotes-vX.Y.md)
+
+**Purpose:** Final testing summary at release time
+
+**Location:** `project management/versions/vX.Y/ReleaseNotes-vX.Y.md`
+
+**Contents:**
+- Final coverage percentage
+- Total test count
+- Regression test results
+- Known issues at release
+
+**Example:**
+```markdown
+## Testing Summary
+
+**Coverage:** 92% (Target: 90%) ✅
+**Tests:** 156 passing, 0 failing
+**Execution Time:** 45 seconds
+
+**By Requirement:**
+- FR-1: 15/15 tests ✅
+- FR-2: 12/12 tests ✅
+- NFR-1: 8/8 tests ✅
+
+**Regression:** All v1.0 features verified ✅
+```
+
+**When to Update:** At version release
+
+#### 5. In Project Conventions (This Document)
+
+**Purpose:** Testing standards and best practices
+
+**Contents:**
+- TDD workflow
+- Coverage targets
+- Test naming conventions
+- Definition of Done
+
+**When to Update:** When conventions evolve
+
+### Test Documentation Workflow
+
+**During Requirements Phase:**
+1. Add test acceptance criteria to each FR/NFR in PRD
+2. Create TestPlan-vX.Y.md with strategy and test matrix
+
+**During Development (TDD):**
+1. Write test in test file (with docstring linking to FR-X.Y)
+2. Run test (Red)
+3. Write code
+4. Run test (Green)
+5. Update TestPlan-vX.Y.md with test results
+
+**At Release:**
+1. Run full test suite
+2. Update TestPlan-vX.Y.md with final results
+3. Add testing summary to ReleaseNotes-vX.Y.md
+
+### Test Documentation Standards
+
+**Consistency:**
+- Use Test-X.Y.Z numbering that matches FR-X.Y
+- Always link test code to requirements in docstrings
+- Keep TestPlan current (update after each significant test run)
+
+**Traceability:**
+```
+User Story → FR-X.Y → Test-X.Y.Z → test_file.py::test_function
+```
+
+**Example Traceability Chain:**
+```
+Story 2: Hot Reload
+  ↓
+FR-4.1: Hot Reload Support
+  ↓
+Test-4.1.1: Python file reload < 2s
+  ↓
+tests/backend/integration/test_hot_reload.py::test_python_hot_reload_speed
+```
+
+---
+
 ### Continuous Improvement
 
 **Test Metrics to Track:**
@@ -888,6 +1088,16 @@ llm-council/
 │   └── vite.config.js
 ├── data/                            # Persistent data (gitignored)
 │   └── conversations/
+├── tests/                           # Test files
+│   ├── backend/
+│   │   ├── unit/
+│   │   ├── integration/
+│   │   └── e2e/
+│   ├── frontend/
+│   │   ├── unit/
+│   │   ├── integration/
+│   │   └── e2e/
+│   └── conftest.py                  # Shared fixtures
 ├── project management/              # Documentation
 │   ├── ProjectConventions.md       # This document
 │   ├── ProductOverview.md          # Living system doc (all versions)
@@ -895,18 +1105,19 @@ llm-council/
 │   │   ├── v1.0/
 │   │   │   ├── PRD-v1.0.md
 │   │   │   ├── TechnicalSpec-v1.0.md
+│   │   │   ├── TestPlan-v1.0.md
 │   │   │   └── ReleaseNotes-v1.0.md
 │   │   ├── v1.1/
 │   │   │   ├── PRD-v1.1.md
 │   │   │   ├── TechnicalSpec-v1.1.md
 │   │   │   ├── ImplementationPlan-v1.1.md
+│   │   │   ├── TestPlan-v1.1.md
 │   │   │   └── ReleaseNotes-v1.1.md
 │   │   └── v2.0/
 │   │       └── PRD-v2.0.md
 │   └── archives/                    # Deprecated documents
 ├── utilities/                       # Development utilities
 │   └── [helper_scripts].py
-├── tests/                           # Test files (if created)
 ├── .env                             # Environment variables (gitignored)
 ├── .gitignore
 ├── README.md                        # User-facing documentation
@@ -969,6 +1180,7 @@ Thumbs.db
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
+| 1.3 | 2025-12-24 | Add test documentation standards: 5 documentation locations (PRD, TestPlan, test code, ReleaseNotes, Conventions), traceability chain, documentation workflow | Development Team |
 | 1.2 | 2025-12-24 | Add strict TDD standards, test-first workflow, 90%+ coverage targets, testability requirements, advisory enforcement policy | Development Team |
 | 1.1 | 2025-12-24 | Add version-based PRD workflow, LLM-assisted ProductOverview maintenance, version-qualified requirement IDs | Development Team |
 | 1.0 | 2025-12-24 | Initial version with requirements format, documentation standards, code conventions | Development Team |
