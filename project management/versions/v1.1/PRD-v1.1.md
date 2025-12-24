@@ -94,6 +94,38 @@ This document outlines the product requirements for containerizing the LLM Counc
 
 ---
 
+## Requirements Traceability Matrix
+
+This matrix maps user stories to functional and non-functional requirements, ensuring all user needs are addressed.
+
+| User Story | Functional Requirements | Non-Functional Requirements | Notes |
+|------------|------------------------|----------------------------|-------|
+| **Story 1: Simple Setup** | FR-3.1 (Service Definitions)<br/>FR-4.3 (Single Command Startup)<br/>FR-5.1 (Docker Instructions) | NFR-4.1 (Setup Simplicity)<br/>NFR-4.2 (Documentation Quality) | One-command startup with clear docs |
+| **Story 2: Development Hot Reload** | FR-4.1 (Hot Reload Support)<br/>FR-1.2 (Backend Volume Mounts)<br/>FR-2.2 (Frontend Volume Mounts)<br/>FR-2.3 (Frontend HMR Config) | NFR-1.2 (Hot Reload Speed)<br/>NFR-1.3 (Runtime Performance) | Seamless dev experience |
+| **Story 3: Data Persistence** | FR-4.2 (Data Persistence)<br/>FR-1.2 (Backend Volume Mounts - data/) | NFR-3.2 (Data Integrity) | No data loss on restarts |
+| **Story 4: Cloud Deployment** | Out of scope for v1.1 | - | Foundation provided by FR-1, FR-2, FR-3 |
+
+### Coverage Analysis
+
+**User Story Coverage:**
+- ✅ Story 1: Fully covered by 3 FRs and 2 NFRs
+- ✅ Story 2: Fully covered by 4 FRs and 2 NFRs  
+- ✅ Story 3: Fully covered by 2 FRs and 1 NFR
+- ⚪ Story 4: Out of scope (deferred to v2.1)
+
+**Requirements Without Direct User Stories:**
+- **FR-1.1, FR-1.3** (Backend Dockerfile, Health Check): Technical enablers for FR-4.3
+- **FR-2.1** (Frontend Dockerfile): Technical enabler for FR-4.3
+- **FR-3.2, FR-3.3** (Service Dependencies, Port Mapping): Technical enablers for FR-4.3
+- **FR-5.2, FR-5.3** (Build Optimization, Helper Scripts): Developer experience improvements
+- **NFR-1.1** (Startup Time): General performance requirement
+- **NFR-2.x** (Compatibility): Technical constraints, not user-facing
+- **NFR-3.1** (Container Stability): Foundation for all stories
+
+**Justification:** All "orphaned" requirements are technical enablers or foundational quality attributes that support the user stories indirectly.
+
+---
+
 ## Requirements
 
 ### Functional Requirements

@@ -111,6 +111,39 @@ Track requirement status using these labels:
 | [v2.0-FR-3] | v2.0 | ⚪ | User authentication | [PRD](./versions/v2.0/PRD-v2.0.md#fr-3) |
 ```
 
+### Requirements Traceability
+
+All PRDs must include a **Requirements Traceability Matrix** that maps User Stories to Requirements.
+
+**Purpose:**
+- Ensure all user needs are addressed by requirements
+- Identify orphaned requirements (not tied to user value)
+- Verify requirements coverage
+- Maintain traceability chain: User Need → User Story → Requirements → Implementation → Tests
+
+**Format:**
+
+```markdown
+## Requirements Traceability Matrix
+
+| User Story | Functional Requirements | Non-Functional Requirements | Notes |
+|------------|------------------------|----------------------------|-------|
+| Story 1: Simple Setup | FR-3.1, FR-4.3, FR-5.1 | NFR-4.1 | One-command startup |
+| Story 2: Hot Reload | FR-4.1, FR-1.2, FR-2.2, FR-2.3 | NFR-1.2 | Dev experience |
+| Story 3: Data Persistence | FR-4.2, FR-1.2 | NFR-3.2 | No data loss |
+| Story 4: Cloud Deployment | Out of scope v1.1 | - | Foundation only |
+```
+
+**Placement:**
+- Add section after "User Stories" and before "Requirements" in PRD
+- Update as requirements evolve
+- Review during requirement changes to ensure mapping stays current
+
+**Validation:**
+- Every user story should map to at least one FR
+- Critical user stories should have supporting NFRs
+- Requirements without user stories should be justified (technical debt, refactoring, etc.)
+
 ---
 
 ## Documentation Standards
