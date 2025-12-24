@@ -1,5 +1,8 @@
 /**
  * API client for the LLM Council backend.
+ * 
+ * Updated for v1.2: Uses versioned API endpoints (/api/v1/)
+ * Implements: FR-4.1 (Existing Frontend Unchanged)
  */
 
 const API_BASE = 'http://localhost:8001';
@@ -9,7 +12,7 @@ export const api = {
    * List all conversations.
    */
   async listConversations() {
-    const response = await fetch(`${API_BASE}/api/conversations`);
+    const response = await fetch(`${API_BASE}/api/v1/conversations`);
     if (!response.ok) {
       throw new Error('Failed to list conversations');
     }
@@ -20,7 +23,7 @@ export const api = {
    * Create a new conversation.
    */
   async createConversation() {
-    const response = await fetch(`${API_BASE}/api/conversations`, {
+    const response = await fetch(`${API_BASE}/api/v1/conversations`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -38,7 +41,7 @@ export const api = {
    */
   async getConversation(conversationId) {
     const response = await fetch(
-      `${API_BASE}/api/conversations/${conversationId}`
+      `${API_BASE}/api/v1/conversations/${conversationId}`
     );
     if (!response.ok) {
       throw new Error('Failed to get conversation');
@@ -51,7 +54,7 @@ export const api = {
    */
   async sendMessage(conversationId, content) {
     const response = await fetch(
-      `${API_BASE}/api/conversations/${conversationId}/message`,
+      `${API_BASE}/api/v1/conversations/${conversationId}/message`,
       {
         method: 'POST',
         headers: {
@@ -75,7 +78,7 @@ export const api = {
    */
   async sendMessageStream(conversationId, content, onEvent) {
     const response = await fetch(
-      `${API_BASE}/api/conversations/${conversationId}/message/stream`,
+      `${API_BASE}/api/v1/conversations/${conversationId}/message/stream`,
       {
         method: 'POST',
         headers: {

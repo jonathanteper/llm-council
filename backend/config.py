@@ -82,3 +82,26 @@ OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 # Data directory for conversation storage
 DATA_DIR = "data/conversations"
+
+# CORS configuration for v1.2 API-ready architecture (FR-1.1)
+# Configurable origins for cross-origin requests
+CORS_ORIGINS_STR = os.getenv("API_CORS_ORIGINS", "http://localhost:5173,http://localhost:3000")
+CORS_ORIGINS = [origin.strip() for origin in CORS_ORIGINS_STR.split(",") if origin.strip()]
+
+# Support wildcard for development (not recommended for production)
+if CORS_ORIGINS_STR.strip() == "*":
+    CORS_ORIGINS = ["*"]
+
+print(f"[Config] CORS origins: {CORS_ORIGINS}")
+
+# API Authentication configuration for v1.2 (FR-1.2)
+# Optional API key authentication
+API_AUTH_ENABLED = os.getenv("API_AUTH_ENABLED", "false").lower() == "true"
+API_KEYS_STR = os.getenv("API_KEYS", "")
+API_KEYS = [key.strip() for key in API_KEYS_STR.split(",") if key.strip()] if API_KEYS_STR else []
+
+print(f"[Config] API auth enabled: {API_AUTH_ENABLED}")
+if API_AUTH_ENABLED and API_KEYS:
+    print(f"[Config] API keys configured: {len(API_KEYS)} key(s)")
+elif API_AUTH_ENABLED and not API_KEYS:
+    print(f"[Config] WARNING: API auth enabled but no keys configured!")
