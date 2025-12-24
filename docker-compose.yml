@@ -1,0 +1,65 @@
+# Docker Compose configuration for LLM Council
+# Implements: FR-3.1 (Service Definitions), FR-3.2 (Dependencies), FR-3.3 (Port Mapping)
+#             FR-1.2 (Backend Volume Mounts), FR-2.2 (Frontend Volume Mounts)
+#             FR-4.3 (Single Command Startup)
+
+version: '3.8'
+
+services:
+  # Backend Service - FastAPI + Python
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    container_name: llm-council-backend
+    ports:
+      - "8001:8001"  # FR-3.3: Backend API port mapping
+    volumes:
+      # FR-1.2: Backend volume mounts for hot reload and data persistence
+      - ./backend:/app/backend           # Backend source code (read-write for hot reload)
+      - ./data:/app/data                 # Conversation data (read-write for persistence)
+      - ./.env:/app/.env:ro              # Environment config (read-only for security)
+      - ./pyproject.toml:/app/pyproject.toml:ro  # Dependencies file
+      - ./uv.lock:/app/uv.lock:ro        # Lock file for reproducible builds
+    environment:
+      - PYTHONUNBUFFERED=1               # Ensure Python output is sent straight to terminal
+    healthcheck:
+      # FR-3.2: Health check for service orchestration (uses FR-1.3 endpoint)
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+    networks:
+      - llm-council-network
+
+  # Frontend Service - React + Vite
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend.Dockerfile
+    container_name: llm-council-frontend
+    ports:
+      - "5173:5173"  # FR-3.3: Frontend dev server port mapping
+    volumes:
+      # FR-2.2: Frontend volume mounts for hot reload
+      - ./frontend:/app                  # Frontend source code (read-write for hot reload)
+      - /app/node_modules                # Anonymous volume to preserve container dependencies
+    environment:
+      - NODE_ENV=development             # Development mode for Vite
+    depends_on:
+      # FR-3.2: Frontend depends on backend health
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - llm-council-network
+
+# Networks
+networks:
+  llm-council-network:
+    driver: bridge
+
+# Note: No named volumes needed - all data is in bind mounts for development
+

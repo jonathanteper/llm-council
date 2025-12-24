@@ -1,0 +1,80 @@
+# Docker build ignore file
+# Implements: FR-5.2 (Build Optimization)
+#
+# Excludes unnecessary files from Docker build context to:
+# - Reduce image size
+# - Speed up build times
+# - Prevent sensitive data from entering images
+
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed in runtime)
+*.md
+docs/
+
+# Project management docs
+project management/
+header.jpg
+
+# Utilities (not needed in runtime)
+utilities/
+
+# Environment file (mounted as volume instead)
+.env
+.env.*
+
+# Data directory (mounted as volume instead)
+data/
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Test files
+tests/
+pytest.ini
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Logs
+*.log
+
+# Note: For frontend builds, node_modules inside frontend/ will be excluded
+# For backend builds, frontend source will be included but node_modules excluded
+frontend/node_modules/
+

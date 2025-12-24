@@ -59,12 +59,49 @@ CHAIRMAN_MODEL = "google/gemini-3-pro-preview"
 
 ## Running the Application
 
-**Option 1: Use the start script**
+### Option 1: Docker (Recommended) 🐳
+
+The easiest way to run the application is with Docker Compose. This method requires minimal setup and works consistently across different machines.
+
+**Prerequisites:**
+- [Docker](https://www.docker.com/) or [OrbStack](https://orbstack.dev/) (recommended for macOS)
+- A `.env` file with your OpenRouter API key (see setup above)
+
+**Start the application:**
+```bash
+docker compose up
+```
+
+That's it! The command will:
+- Build both backend and frontend containers
+- Start both services with hot reload enabled
+- Make the app available at http://localhost:5173
+- Keep your data persistent in the `data/` directory
+
+**Stop the application:**
+```bash
+# Press Ctrl+C in the terminal where docker compose is running
+# Or in a different terminal:
+docker compose down
+```
+
+**Benefits of Docker:**
+- ✅ No need to install Python, Node.js, or uv
+- ✅ Consistent environment across all machines
+- ✅ Hot reload works for both backend and frontend
+- ✅ Data persists across container restarts
+- ✅ One command to start everything
+
+### Option 2: Native Development
+
+If you prefer to run the application natively without Docker:
+
+**Use the start script:**
 ```bash
 ./start.sh
 ```
 
-**Option 2: Run manually**
+**Or run manually:**
 
 Terminal 1 (Backend):
 ```bash
@@ -79,9 +116,76 @@ npm run dev
 
 Then open http://localhost:5173 in your browser.
 
+**Native Prerequisites:**
+- Python 3.10+ with [uv](https://docs.astral.sh/uv/) installed
+- Node.js 20+ with npm
+- Dependencies installed (see Setup section above)
+
 ## Tech Stack
 
 - **Backend:** FastAPI (Python 3.10+), async httpx, OpenRouter API
 - **Frontend:** React + Vite, react-markdown for rendering
 - **Storage:** JSON files in `data/conversations/`
 - **Package Management:** uv for Python, npm for JavaScript
+- **Containerization:** Docker + Docker Compose (optional)
+
+## Development
+
+### Hot Reload
+
+Both Docker and native development support hot reload:
+- **Backend**: Python file changes trigger automatic uvicorn reload
+- **Frontend**: React component changes trigger Vite HMR (Hot Module Replacement)
+
+Changes should be reflected in your browser within 1-2 seconds.
+
+### Project Structure
+
+```
+llm-council/
+├── backend/              # FastAPI backend
+│   ├── main.py          # API server
+│   ├── council.py       # Council orchestration logic
+│   ├── config.py        # Model configuration
+│   └── storage.py       # JSON file storage
+├── frontend/            # React frontend
+│   ├── src/
+│   │   ├── components/  # React components
+│   │   └── api.js       # Backend API client
+│   └── vite.config.js   # Vite configuration
+├── data/                # Persistent conversation data
+│   └── conversations/
+├── docker-compose.yml   # Docker orchestration
+├── backend.Dockerfile   # Backend container
+└── frontend.Dockerfile  # Frontend container
+```
+
+### Troubleshooting
+
+**Docker Issues:**
+
+- **Port already in use**: Stop any services using ports 8001 or 5173
+  ```bash
+  docker compose down
+  # Or check what's using the port:
+  lsof -i :8001
+  lsof -i :5173
+  ```
+
+- **Changes not reflecting**: Ensure volume mounts are working
+  ```bash
+  docker compose down
+  docker compose up --build
+  ```
+
+- **See logs**:
+  ```bash
+  docker compose logs backend
+  docker compose logs frontend
+  ```
+
+**Native Issues:**
+
+- **Backend won't start**: Check your `.env` file exists and has valid API key
+- **Frontend build errors**: Delete `node_modules` and run `npm install` again
+- **Port conflicts**: Make sure nothing else is using ports 8001 or 5173

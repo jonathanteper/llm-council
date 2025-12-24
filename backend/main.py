@@ -52,8 +52,20 @@ class Conversation(BaseModel):
 
 @app.get("/")
 async def root():
-    """Health check endpoint."""
+    """Root endpoint."""
     return {"status": "ok", "service": "LLM Council API"}
+
+
+@app.get("/health")
+async def health_check():
+    """
+    Health check endpoint for Docker container orchestration.
+    
+    Implements: FR-1.3 (Backend Health Check)
+    
+    Returns service status for Docker health checks and monitoring.
+    """
+    return {"status": "healthy", "service": "LLM Council API"}
 
 
 @app.get("/api/conversations", response_model=List[ConversationMetadata])
