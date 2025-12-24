@@ -19,3 +19,7 @@ data/
 frontend/node_modules/
 frontend/dist/
 frontend/.vite/
+
+# Skills (centrally managed via symlinks)
+# See: https://github.com/jonathanteper/skills/tree/main/vibe-coding
+.skills/
