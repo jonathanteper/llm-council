@@ -1,8 +1,8 @@
-# Product Requirements Document: LLM Council Containerization
+# Product Requirements Document: LLM Council v1.1 - Containerization
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Date:** December 24, 2025  
-**Status:** Draft  
+**Status:** In Progress  
 **Owner:** Development Team
 
 ---
@@ -305,9 +305,16 @@ These may be addressed in later versions:
 ## Appendix
 
 ### Related Documents
-- Technical Specification: `TechnicalSpec.md`
-- Implementation Plan: `ImplementationPlan.md`
-- Main README: `../README.md`
+
+### Version Documentation
+- [Product Overview](../../ProductOverview.md) - System-wide documentation
+- [v1.0 PRD](../v1.0/PRD-v1.0.md) - Core functionality (prerequisite)
+- [Technical Specification](./TechnicalSpec-v1.1.md) - v1.1 architecture details
+- [Implementation Plan](./ImplementationPlan-v1.1.md) - v1.1 step-by-step guide
+
+### Project Documentation
+- [Project Conventions](../../ProjectConventions.md) - Development standards
+- [Main README](../../../README.md) - User-facing documentation
 
 ### Glossary
 - **OrbStack**: Fast, lightweight container runtime for macOS

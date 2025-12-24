@@ -1,8 +1,8 @@
-# Technical Specification: LLM Council Containerization
+# Technical Specification: LLM Council v1.1 - Containerization
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Date:** December 24, 2025  
-**Status:** Draft  
+**Status:** In Progress  
 **Author:** Development Team
 
 ---
@@ -773,9 +773,12 @@ llm-council/
 
 ### Related Documents
 
-- Product Requirements: `PRD.md`
-- Implementation Plan: `ImplementationPlan.md`
-- Main Documentation: `../README.md`
+- [Product Overview](../../ProductOverview.md) - System-wide documentation
+- [v1.1 PRD](./PRD-v1.1.md) - Product requirements
+- [v1.1 Implementation Plan](./ImplementationPlan-v1.1.md) - Step-by-step guide
+- [v1.0 PRD](../v1.0/PRD-v1.0.md) - Core functionality
+- [Project Conventions](../../ProjectConventions.md) - Development standards
+- [Main README](../../../README.md) - User documentation
 
 ### References
 

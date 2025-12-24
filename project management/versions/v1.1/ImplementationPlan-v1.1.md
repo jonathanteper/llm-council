@@ -1,6 +1,6 @@
-# Implementation Plan: LLM Council Containerization
+# Implementation Plan: LLM Council v1.1 - Containerization
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Date:** December 24, 2025  
 **Status:** Ready for Implementation  
 **Estimated Duration:** 1-2 weeks
@@ -1237,10 +1237,12 @@ docker builder prune
 
 ### Related Documents
 
-- Product Requirements: `PRD.md`
-- Technical Specification: `TechnicalSpec.md`
-- Troubleshooting: `Docker-Troubleshooting.md` (created in Phase 4)
-- Main Documentation: `../README.md`
+- [v1.1 PRD](./PRD-v1.1.md) - Product requirements
+- [v1.1 Technical Specification](./TechnicalSpec-v1.1.md) - Architecture details
+- [Product Overview](../../ProductOverview.md) - System-wide documentation
+- [Docker Troubleshooting](./Docker-Troubleshooting.md) - Created in Phase 4
+- [Project Conventions](../../ProjectConventions.md) - Development standards
+- [Main README](../../../README.md) - User documentation
 
 ---
 
