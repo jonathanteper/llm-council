@@ -1,6 +1,6 @@
 # Project Conventions: LLM Council
 
-**Version:** 1.1  
+**Version:** 1.2  
 **Date:** December 24, 2025  
 **Status:** Active  
 **Purpose:** Establish consistent standards and conventions for development
@@ -544,51 +544,329 @@ Related: [v1.1-FR-1.2]
 
 ## Testing Standards
 
+### Testing Philosophy
+
+We follow **Strict Test-Driven Development (TDD)** with **advisory enforcement**:
+
+- **High Standards:** Write tests before code, aim for 90%+ coverage
+- **Self-Discipline:** Tests inform but don't block commits (team accountability)
+- **Testability First:** Design for testability from the requirement phase
+- **Progressive Rigor:** More tests as features mature and become critical
+
+**Core Principle:** Tests are living documentation that prove the system works as designed.
+
+### Test-Driven Development Workflow
+
+**Standard TDD Cycle (Red → Green → Refactor):**
+
+1. **Write Test First** (Red)
+   - Read the requirement (FR-X.Y)
+   - Write test that validates the requirement
+   - Test fails (no implementation yet)
+
+2. **Write Minimal Code** (Green)
+   - Implement just enough to make test pass
+   - Test passes
+
+3. **Refactor** (Clean)
+   - Improve code quality
+   - Tests still pass
+   - Commit
+
+**Example Flow:**
+```bash
+# 1. Write test for FR-1.1 (Backend Dockerfile)
+$ touch tests/backend/test_dockerfile.py
+$ # Write test_backend_image_builds()
+$ pytest tests/backend/test_dockerfile.py  # FAILS ❌
+
+# 2. Create Dockerfile
+$ touch backend.Dockerfile
+$ # Write minimal Dockerfile
+$ pytest tests/backend/test_dockerfile.py  # PASSES ✅
+
+# 3. Refactor and commit
+$ git add backend.Dockerfile tests/backend/test_dockerfile.py
+$ git commit -m "feat: Add backend Dockerfile (FR-1.1)"
+```
+
+### Testability Requirements
+
+**Every FR must be independently testable:**
+
+When writing requirements, ask:
+- ✅ "How will I verify this works?"
+- ✅ "Can I test this in isolation?"
+- ✅ "What are the inputs and expected outputs?"
+
+**Bad (not testable):**
+```markdown
+FR-1: The system shall be fast
+```
+
+**Good (testable):**
+```markdown
+FR-1: Hot Reload Performance
+
+The system shall reload code changes within 2 seconds.
+
+**Test Acceptance Criteria:**
+- Test-1.1: Modify Python file → reload completes < 2s
+- Test-1.2: Modify React file → HMR completes < 2s
+- Test-1.3: Measure 10 reloads → 90th percentile < 2s
+
+**Test Type:** Integration
+**Risk Level:** Medium
+```
+
+### Requirement Test Planning
+
+All FRs and NFRs must include:
+
+```markdown
+#### FR-X.Y: Requirement Title
+
+The system shall...
+
+**Test Plan:**
+- Test-X.Y.1: [Specific test case]
+- Test-X.Y.2: [Specific test case]
+- Test-X.Y.3: [Specific test case]
+
+**Test Type:** Unit | Integration | E2E
+**Risk Level:** High | Medium | Low
+**Coverage Target:** 90% | 70% | 50%
+**Test Files:** `tests/backend/test_feature.py`
+**Status:** ⏳ 2/3 passing | ✅ 3/3 passing
+```
+
+### Coverage Targets
+
+**Strict Coverage Standards:**
+
+| Code Type | Target | Rationale |
+|-----------|--------|-----------|
+| **Core Features** (v1.0 code still used) | 90%+ | Critical path, high risk |
+| **New Features** (current version) | 90%+ | Build quality in from start |
+| **Utilities/Helpers** | 95%+ | Reused everywhere, must be solid |
+| **UI Components** | 70%+ | Visual testing harder to automate |
+| **Overall Project** | 90%+ | Maintain high standard across codebase |
+
+**Measuring Coverage:**
+
+```bash
+# Backend
+pytest --cov=backend --cov-report=term-missing --cov-fail-under=90
+
+# Frontend
+npm test -- --coverage --coverageThreshold='{"global":{"lines":90}}'
+```
+
 ### Test Organization
+
+**Directory Structure:**
 
 ```
 tests/
 ├── backend/
-│   ├── test_api.py
-│   ├── test_council.py
-│   └── test_storage.py
-└── frontend/
-    └── components/
-        └── Component.test.jsx
+│   ├── unit/
+│   │   ├── test_config.py
+│   │   ├── test_council.py
+│   │   └── test_storage.py
+│   ├── integration/
+│   │   ├── test_api_endpoints.py
+│   │   └── test_openrouter_integration.py
+│   └── e2e/
+│       └── test_council_workflow.py
+├── frontend/
+│   ├── unit/
+│   │   └── components/
+│   │       ├── ChatInterface.test.jsx
+│   │       └── Sidebar.test.jsx
+│   ├── integration/
+│   │   └── test_api_client.test.js
+│   └── e2e/
+│       └── test_user_flows.test.js
+└── conftest.py  # Shared fixtures
 ```
 
-### Test Naming
+### Test Naming Conventions
 
-**Python:**
+**Python (pytest):**
 ```python
 def test_council_processes_query_successfully():
-    """Test that council processes a valid query."""
-    pass
+    """Test FR-1.1: Council processes valid query through all stages."""
+    # Arrange
+    council = CouncilOrchestrator(models=TEST_MODELS)
+    query = "What is quantum computing?"
+    
+    # Act
+    result = await council.process_query(query)
+    
+    # Assert
+    assert result.stage1_responses is not None
+    assert len(result.stage1_responses) == len(TEST_MODELS)
+    assert result.stage3_synthesis is not None
 
 def test_council_handles_api_error_gracefully():
-    """Test error handling when API fails."""
-    pass
+    """Test NFR-2.1: System handles OpenRouter API errors."""
+    # Arrange
+    council = CouncilOrchestrator(models=["invalid/model"])
+    
+    # Act & Assert
+    with pytest.raises(APIError) as exc_info:
+        await council.process_query("test")
+    assert "OpenRouter error" in str(exc_info.value)
 ```
 
-**JavaScript:**
+**JavaScript (Jest/Vitest):**
 ```javascript
-describe('Component', () => {
-  it('renders with provided title', () => {
-    // Test implementation
+describe('ChatInterface (FR-4.1)', () => {
+  it('should render query input and submit button', () => {
+    // Arrange
+    render(<ChatInterface />);
+    
+    // Act
+    const input = screen.getByPlaceholderText('Ask your question...');
+    const button = screen.getByRole('button', { name: /submit/i });
+    
+    // Assert
+    expect(input).toBeInTheDocument();
+    expect(button).toBeInTheDocument();
   });
   
-  it('calls onSubmit when button clicked', () => {
-    // Test implementation
+  it('should call onSubmit when form submitted (FR-4.1.1)', () => {
+    // Arrange
+    const mockOnSubmit = jest.fn();
+    render(<ChatInterface onSubmit={mockOnSubmit} />);
+    
+    // Act
+    const input = screen.getByPlaceholderText('Ask your question...');
+    fireEvent.change(input, { target: { value: 'test query' } });
+    fireEvent.click(screen.getByRole('button', { name: /submit/i }));
+    
+    // Assert
+    expect(mockOnSubmit).toHaveBeenCalledWith('test query');
   });
 });
 ```
 
-### Testing Requirements
+### Test Types
 
-- **Unit tests:** Test individual functions/components
-- **Integration tests:** Test service interactions
-- **E2E tests:** Test full user workflows (if applicable)
-- **Coverage goal:** 70%+ for critical paths
+**Unit Tests:**
+- Test individual functions/classes in isolation
+- Mock all external dependencies
+- Fast execution (milliseconds)
+- 90%+ coverage target
+
+**Integration Tests:**
+- Test multiple components working together
+- May use real external services (or test doubles)
+- Moderate execution time (seconds)
+- Cover critical paths
+
+**End-to-End Tests:**
+- Test complete user workflows
+- Use real browser, real services
+- Slow execution (minutes)
+- Cover major user stories
+
+### Definition of Done
+
+A requirement is "Done" when:
+
+**For All Requirements:**
+1. ✅ Tests written BEFORE code (TDD)
+2. ✅ All tests passing
+3. ✅ Code implemented
+4. ✅ Coverage target met (90%+ for most code)
+5. ✅ Code reviewed
+6. ✅ Documentation updated
+
+**Additional for HIGH Risk:**
+7. ✅ Integration tests included
+8. ✅ Added to regression test suite
+
+### Test Enforcement Policy
+
+**Advisory, Not Blocking:**
+- ❌ Tests do NOT block commits
+- ❌ Tests do NOT block merges
+- ❌ Tests do NOT block releases
+- ✅ Tests inform the team
+- ✅ Team holds each other accountable
+- ✅ Coverage reports visible in PRs
+
+**Rationale:** Trust and discipline over automation. The team commits to TDD as a practice, not because tools force it.
+
+**Visibility:**
+```bash
+# Run before commit (but doesn't block)
+$ pytest --cov=backend --cov-report=term
+$ npm test -- --coverage
+
+# Show in PR description
+Coverage: 92% (+2% from main)
+Tests: 156 passing, 0 failing
+```
+
+### Regression Testing
+
+**Between Versions:** TBD - will evolve as project scales
+
+**Initial Approach:**
+- Run full test suite before version releases
+- Document any breaking changes
+- Manual smoke testing of critical paths
+
+**Future Considerations:**
+- Automated regression matrix across versions
+- Snapshot testing for UI consistency
+- Performance regression tracking
+
+### Test Data Management
+
+**Fixtures and Mocks:**
+```python
+# tests/conftest.py
+import pytest
+
+@pytest.fixture
+def mock_openrouter_response():
+    """Mock OpenRouter API response for testing."""
+    return {
+        "choices": [{
+            "message": {
+                "role": "assistant",
+                "content": "Test response from GPT"
+            }
+        }]
+    }
+
+@pytest.fixture
+def test_conversation():
+    """Sample conversation for testing."""
+    return {
+        "id": "test-123",
+        "messages": [
+            {"role": "user", "content": "What is AI?"}
+        ]
+    }
+```
+
+### Continuous Improvement
+
+**Test Metrics to Track:**
+- Coverage percentage over time
+- Test execution time
+- Flaky test rate
+- Bug escape rate (bugs found in production vs caught by tests)
+
+**Review Questions:**
+- Are tests catching bugs before production?
+- Is TDD making code design better?
+- Are tests documentation-quality?
+- Is coverage meaningful or just high numbers?
 
 ---
 
@@ -691,6 +969,7 @@ Thumbs.db
 
 | Version | Date | Changes | Author |
 |---------|------|---------|--------|
+| 1.2 | 2025-12-24 | Add strict TDD standards, test-first workflow, 90%+ coverage targets, testability requirements, advisory enforcement policy | Development Team |
 | 1.1 | 2025-12-24 | Add version-based PRD workflow, LLM-assisted ProductOverview maintenance, version-qualified requirement IDs | Development Team |
 | 1.0 | 2025-12-24 | Initial version with requirements format, documentation standards, code conventions | Development Team |
 
