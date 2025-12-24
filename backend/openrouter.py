@@ -21,6 +21,15 @@ async def query_model(
     Returns:
         Response dict with 'content' and optional 'reasoning_details', or None if failed
     """
+    # Validate API key
+    if not OPENROUTER_API_KEY:
+        print(f"ERROR: OPENROUTER_API_KEY is not set when querying {model}")
+        return None
+    
+    if OPENROUTER_API_KEY == "sk-or-v1-your-api-key-here":
+        print(f"ERROR: OPENROUTER_API_KEY is still the placeholder when querying {model}")
+        return None
+    
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
         "Content-Type": "application/json",
@@ -48,6 +57,15 @@ async def query_model(
                 'reasoning_details': message.get('reasoning_details')
             }
 
+    except httpx.HTTPStatusError as e:
+        if e.response.status_code == 401:
+            print(f"ERROR: 401 Unauthorized for model {model}")
+            print(f"  API Key being used: {OPENROUTER_API_KEY[:20]}... (length: {len(OPENROUTER_API_KEY)})")
+            print(f"  Check your .env file and ensure the key is correct")
+            print(f"  Full error: {e}")
+        else:
+            print(f"Error querying model {model}: HTTP {e.response.status_code} - {e}")
+        return None
     except Exception as e:
         print(f"Error querying model {model}: {e}")
         return None
